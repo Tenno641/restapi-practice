@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Connecty.Api/Connecty.Api.csproj" />
+  <Project Path="Connecty.Application/Connecty.Application.csproj" />
+  <Project Path="Connecty.Contracts/Connecty.Contracts.csproj" />
+</Solution>
