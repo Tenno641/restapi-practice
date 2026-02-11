@@ -2,5 +2,5 @@
 
 public class MoviesResponse
 {
-    public IEnumerable<MovieResponse> Movies { get; init; } = Enumerable.Empty<MovieResponse>();
+    public IEnumerable<MovieResponse> Items { get; init; } = Enumerable.Empty<MovieResponse>();
 }

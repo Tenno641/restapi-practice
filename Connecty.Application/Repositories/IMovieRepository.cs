@@ -4,9 +4,9 @@ namespace Connecty.Application.Repositories;
 
 public interface IMovieRepository
 {
-    Task<bool> Create(Movie movie);
-    Task<bool> Update(Movie movie);
-    Task<bool> Delete(Guid id);
-    Task<IEnumerable<Movie>> All();
-    Task<Movie?> Get(Guid id);
+    Task<bool> CreateAsync(Movie movie);
+    Task<bool> UpdateAsync(Guid id, Movie movie);
+    Task<bool> DeleteAsync(Guid id);
+    Task<IEnumerable<Movie>> AllAsync();
+    Task<Movie?> GetAsync(Guid id);
 }

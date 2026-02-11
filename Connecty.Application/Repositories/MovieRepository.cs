@@ -6,38 +6,38 @@ public class MovieRepository : IMovieRepository
 {
     private readonly List<Movie> _movies = [];
     
-    public Task<bool> Create(Movie movie)
+    public async Task<bool> CreateAsync(Movie movie)
     {
         _movies.Add(movie);
         
-        return Task.FromResult(true);
+        return await Task.FromResult(true);
     }
     
-    public Task<bool> Update(Movie movie)
+    public async Task<bool> UpdateAsync(Guid id, Movie movie)
     {
-        int existingMovie = _movies.FindIndex(m => m.Id == movie.Id);
+        int existingMovie = _movies.FindIndex(m => m.Id == id);
         
         if (existingMovie == -1)
-            return Task.FromResult(false);
+            return await Task.FromResult(false);
 
         _movies[existingMovie] = movie;
 
-        return Task.FromResult(true);
+        return await Task.FromResult(true);
     }
     
-    public Task<bool> Delete(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         int deletedMovies = _movies.RemoveAll(movie => movie.Id == id);
         
-        return Task.FromResult(deletedMovies > 0);
+        return await Task.FromResult(deletedMovies > 0);
     }
     
-    public async Task<IEnumerable<Movie>> All()
+    public async Task<IEnumerable<Movie>> AllAsync()
     {
         return await Task.FromResult(_movies);
     }
     
-    public async Task<Movie?> Get(Guid id)
+    public async Task<Movie?> GetAsync(Guid id)
     {
         return await Task.FromResult(_movies.Find(movie => movie.Id == id));
     }
