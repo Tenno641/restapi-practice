@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace Connecty.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 public class MoviesController : Controller
 {
     private readonly IMovieRepository _movieRepository;
@@ -18,7 +17,7 @@ public class MoviesController : Controller
         _movieRepository = movieRepository;
     }
 
-    [HttpPost]
+    [HttpPost(ApiEndpoints.Movies.Create)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateMovie request)
     {
@@ -31,10 +30,10 @@ public class MoviesController : Controller
 
         MovieResponse response = movie.ToResponse();
 
-        return CreatedAtAction(nameof(Get), new { id = response.Id }, response);
+        return CreatedAtAction(nameof(Get), new { idOrSlug = response.Id }, response);
     }
 
-    [HttpGet]
+    [HttpGet(ApiEndpoints.Movies.GetAll)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
@@ -45,12 +44,14 @@ public class MoviesController : Controller
         return Ok(responses);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get(Guid id)
+    public async Task<IActionResult> Get(string idOrSlug)
     {
-        Movie? movie = await _movieRepository.GetAsync(id);
+        Movie? movie = Guid.TryParse(idOrSlug, out Guid id)
+            ? await _movieRepository.GetAsync(id)
+            : await _movieRepository.GetAsync(idOrSlug);
 
         if (movie is null)
             return NotFound();
@@ -60,14 +61,14 @@ public class MoviesController : Controller
         return Ok(response);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPut(ApiEndpoints.Movies.Update)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMovie request)
     {
         Movie movie = request.ToMovie(id);
         
-        bool isUpdated = await _movieRepository.UpdateAsync(id, movie);
+        bool isUpdated = await _movieRepository.UpdateAsync(movie);
 
         if (!isUpdated)
             return NotFound();
@@ -77,7 +78,7 @@ public class MoviesController : Controller
         return Ok(response);
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete(ApiEndpoints.Movies.Delete)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)

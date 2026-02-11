@@ -13,7 +13,7 @@ public static class MovieMappings
             Id = Guid.CreateVersion7(),
             Title = request.Title,
             YearOfRelease = request.YearOfRelease,
-            Genres = request.Genres
+            Genres = request.Genres.ToList()
         };
 
         return movie;
@@ -26,6 +26,7 @@ public static class MovieMappings
             Id = movie.Id,
             Title = movie.Title,
             YearOfRelease = movie.YearOfRelease,
+            Slug = movie.Slug,
             Genres = movie.Genres
         };
 
@@ -46,7 +47,7 @@ public static class MovieMappings
             Id = id,
             Title = request.Title,
             YearOfRelease = request.YearOfRelease,
-            Genres = request.Genres
+            Genres = request.Genres.ToList()
         };
 
         return movie;

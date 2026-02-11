@@ -1,0 +1,10 @@
+﻿services:
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    container_name: rest-db
+    environment:
+      POSTGRES_DB: rest-movies
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
