@@ -10,7 +10,7 @@ public class MovieValidator : AbstractValidator<Movie>
     public MovieValidator(IMovieRepository movieRepository)
     {
         _movieRepository = movieRepository;
-        
+
         RuleFor(movie => movie.Id)
             .NotEmpty();
 

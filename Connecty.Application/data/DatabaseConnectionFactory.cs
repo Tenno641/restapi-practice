@@ -16,7 +16,7 @@ public class DatabaseConnectionFactory : IDatabaseConnectionFactory
     {
         _connectionString = connectionString;
     }
-    
+
     public async Task<IDbConnection> CreateConnectionAsync()
     {
         var connection = new NpgsqlConnection(_connectionString);

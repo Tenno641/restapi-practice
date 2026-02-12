@@ -12,7 +12,7 @@ namespace Connecty.Api.Controllers;
 public class MoviesController : Controller
 {
     private readonly IMovieService _movieService;
-    
+
     public MoviesController(IMovieService movieService)
     {
         _movieService = movieService;
@@ -20,11 +20,11 @@ public class MoviesController : Controller
 
     [HttpPost(ApiEndpoints.Movies.Create)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Create([FromBody] CreateMovie request)
+    public async Task<IActionResult> Create([FromBody] CreateMovie request, CancellationToken cancellationToken)
     {
         Movie movie = request.ToMovie();
-        
-        bool isCreated = await _movieService.CreateAsync(movie);
+
+        bool isCreated = await _movieService.CreateAsync(movie, cancellationToken);
 
         if (!isCreated)
             return BadRequest();
@@ -36,9 +36,9 @@ public class MoviesController : Controller
 
     [HttpGet(ApiEndpoints.Movies.GetAll)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        IEnumerable<Movie> movies = await _movieService.AllAsync();
+        IEnumerable<Movie> movies = await _movieService.AllAsync(cancellationToken);
 
         MoviesResponse responses = movies.ToResponses();
 
@@ -48,43 +48,43 @@ public class MoviesController : Controller
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get(string idOrSlug)
+    public async Task<IActionResult> Get(string idOrSlug, CancellationToken cancellationToken)
     {
         Movie? movie = Guid.TryParse(idOrSlug, out Guid id)
-            ? await _movieService.GetAsync(id)
-            : await _movieService.GetAsync(idOrSlug);
+            ? await _movieService.GetAsync(id, cancellationToken)
+            : await _movieService.GetAsync(idOrSlug, cancellationToken);
 
         if (movie is null)
             return NotFound();
 
         MovieResponse response = movie.ToResponse();
-        
+
         return Ok(response);
     }
 
     [HttpPut(ApiEndpoints.Movies.Update)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMovie request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMovie request, CancellationToken cancellationToken)
     {
         Movie movie = request.ToMovie(id);
-        
-        Movie? updatedMovie = await _movieService.UpdateAsync(movie);
+
+        Movie? updatedMovie = await _movieService.UpdateAsync(movie, cancellationToken);
 
         if (updatedMovie is null)
             return NotFound();
 
         MovieResponse response = movie.ToResponse();
-        
+
         return Ok(response);
     }
 
     [HttpDelete(ApiEndpoints.Movies.Delete)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        bool isDeleted = await _movieService.DeleteAsync(id);
+        bool isDeleted = await _movieService.DeleteAsync(id, cancellationToken);
 
         if (!isDeleted)
             return NotFound();

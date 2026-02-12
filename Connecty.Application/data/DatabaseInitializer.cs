@@ -6,7 +6,7 @@ namespace Connecty.Application.data;
 public class DatabaseInitializer
 {
     private readonly IDbConnection _connection;
-    
+
     public DatabaseInitializer(IDbConnection connection)
     {
         _connection = connection;

@@ -37,7 +37,7 @@ public static class MovieMappings
     {
         IEnumerable<MovieResponse> moviesResponse = movies.Select(ToResponse);
 
-        return new MoviesResponse { Items= moviesResponse };
+        return new MoviesResponse { Items = moviesResponse };
     }
 
     public static Movie ToMovie(this UpdateMovie request, Guid id)

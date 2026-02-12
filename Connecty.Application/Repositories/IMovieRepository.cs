@@ -4,11 +4,11 @@ namespace Connecty.Application.Repositories;
 
 public interface IMovieRepository
 {
-    Task<bool> CreateAsync(Movie movie);
-    Task<bool> UpdateAsync(Movie movie);
-    Task<bool> DeleteAsync(Guid id);
-    Task<IEnumerable<Movie>> AllAsync();
-    Task<Movie?> GetAsync(Guid id);
-    Task<Movie?> GetAsync(string slug);
-    Task<bool> ExistsAsync(Guid id);
+    Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default);
+    Task<bool> UpdateAsync(Movie movie, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Movie>> AllAsync(CancellationToken cancellationToken = default);
+    Task<Movie?> GetAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Movie?> GetAsync(string slug, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default);
 }
