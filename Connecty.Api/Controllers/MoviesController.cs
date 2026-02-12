@@ -1,6 +1,7 @@
 ﻿using Connecty.Api.Mappings;
 using Connecty.Application.Models;
 using Connecty.Application.Repositories;
+using Connecty.Application.Services;
 using Connecty.Contracts.Requests;
 using Connecty.Contracts.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +11,11 @@ namespace Connecty.Api.Controllers;
 [ApiController]
 public class MoviesController : Controller
 {
-    private readonly IMovieRepository _movieRepository;
+    private readonly IMovieService _movieService;
     
-    public MoviesController(IMovieRepository movieRepository)
+    public MoviesController(IMovieService movieService)
     {
-        _movieRepository = movieRepository;
+        _movieService = movieService;
     }
 
     [HttpPost(ApiEndpoints.Movies.Create)]
@@ -23,7 +24,7 @@ public class MoviesController : Controller
     {
         Movie movie = request.ToMovie();
         
-        bool isCreated = await _movieRepository.CreateAsync(movie);
+        bool isCreated = await _movieService.CreateAsync(movie);
 
         if (!isCreated)
             return BadRequest();
@@ -37,7 +38,7 @@ public class MoviesController : Controller
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
-        IEnumerable<Movie> movies = await _movieRepository.AllAsync();
+        IEnumerable<Movie> movies = await _movieService.AllAsync();
 
         MoviesResponse responses = movies.ToResponses();
 
@@ -50,8 +51,8 @@ public class MoviesController : Controller
     public async Task<IActionResult> Get(string idOrSlug)
     {
         Movie? movie = Guid.TryParse(idOrSlug, out Guid id)
-            ? await _movieRepository.GetAsync(id)
-            : await _movieRepository.GetAsync(idOrSlug);
+            ? await _movieService.GetAsync(id)
+            : await _movieService.GetAsync(idOrSlug);
 
         if (movie is null)
             return NotFound();
@@ -68,9 +69,9 @@ public class MoviesController : Controller
     {
         Movie movie = request.ToMovie(id);
         
-        bool isUpdated = await _movieRepository.UpdateAsync(movie);
+        Movie? updatedMovie = await _movieService.UpdateAsync(movie);
 
-        if (!isUpdated)
+        if (updatedMovie is null)
             return NotFound();
 
         MovieResponse response = movie.ToResponse();
@@ -83,7 +84,7 @@ public class MoviesController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        bool isDeleted = await _movieRepository.DeleteAsync(id);
+        bool isDeleted = await _movieService.DeleteAsync(id);
 
         if (!isDeleted)
             return NotFound();

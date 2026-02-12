@@ -1,4 +1,5 @@
 using System.Data;
+using Connecty.Api.Middlewares;
 using Connecty.Application;
 using Connecty.Application.data;
 
@@ -11,12 +12,12 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
 
 using IDbConnection connection = await app.Services
     .GetRequiredService<IDatabaseConnectionFactory>()
     .CreateConnectionAsync();
-
 await new DatabaseInitializer(connection).InitializeAsync();
 
 app.Run();
