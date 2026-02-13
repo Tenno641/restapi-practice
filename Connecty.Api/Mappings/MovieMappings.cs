@@ -27,6 +27,8 @@ public static class MovieMappings
             Title = movie.Title,
             YearOfRelease = movie.YearOfRelease,
             Slug = movie.Slug,
+            Rating = movie.Rating,
+            UserRating = movie.UserRating,
             Genres = movie.Genres
         };
 

@@ -1,4 +1,4 @@
-﻿namespace Connecty.Api;
+﻿namespace Connecty.Api.Auth;
 
 public static class AuthConstants
 {
