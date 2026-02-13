@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Identity/">
+    <Project Path="ExternalIdentity\ExternalIdentity.csproj" Type="Classic C#" />
+  </Folder>
   <Project Path="Connecty.Api/Connecty.Api.csproj" />
   <Project Path="Connecty.Application/Connecty.Application.csproj" />
   <Project Path="Connecty.Contracts/Connecty.Contracts.csproj" />

@@ -1,9 +1,9 @@
 ﻿using Connecty.Api.Mappings;
 using Connecty.Application.Models;
-using Connecty.Application.Repositories;
 using Connecty.Application.Services;
 using Connecty.Contracts.Requests;
 using Connecty.Contracts.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Connecty.Api.Controllers;
@@ -18,6 +18,7 @@ public class MoviesController : Controller
         _movieService = movieService;
     }
 
+    [Authorize(AuthConstants.TrustedMember)]
     [HttpPost(ApiEndpoints.Movies.Create)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromBody] CreateMovie request, CancellationToken cancellationToken)
@@ -62,6 +63,7 @@ public class MoviesController : Controller
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.TrustedMember)]
     [HttpPut(ApiEndpoints.Movies.Update)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -79,6 +81,7 @@ public class MoviesController : Controller
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.AdminPolicy)]
     [HttpDelete(ApiEndpoints.Movies.Delete)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
