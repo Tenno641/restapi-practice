@@ -111,6 +111,16 @@ public class MovieRepository : IMovieRepository
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
+        string sortingCommand = string.Empty;
+
+        if (options.SortBy is not null)
+        {
+            sortingCommand = $"""
+                              , m.{options.SortBy}
+                              ORDER BY m.{options.SortBy} {(options.SortOrder == SortOrder.Ascending ? "asc" : "desc")}
+                              """;
+        }
+
         CommandDefinition command = new CommandDefinition($"""
                                                            select m.*, 
                                                                string_agg(distinct g.name, ',') as genres , 
@@ -123,7 +133,7 @@ public class MovieRepository : IMovieRepository
                                                            WHERE
                                                                (@title is null or title like ('%' || @title || '%')) AND
                                                                (@year is null or yearofrelease = @year)
-                                                           group by id, userrating;
+                                                           group by id, userrating {sortingCommand}
                                                            """, new { options.UserId, options.Title, options.Year }, cancellationToken: cancellationToken);
 
         var result = await connection.QueryAsync(command);

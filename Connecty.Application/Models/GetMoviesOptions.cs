@@ -5,4 +5,13 @@ public class GetMoviesOptions
     public string? Title { get; set; }
     public int? Year { get; set; }
     public Guid? UserId { get; set; } = default;
+    public string? SortBy { get; set; }
+    public SortOrder SortOrder { get; set; }
+}
+
+public enum SortOrder
+{
+    Unsorted,
+    Ascending,
+    Descending
 }

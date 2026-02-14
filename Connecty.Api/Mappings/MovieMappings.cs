@@ -54,4 +54,24 @@ public static class MovieMappings
 
         return movie;
     }
+
+    public static GetMoviesOptions ToMoviesOptions(this GetMoviesOptionsRequest request)
+    {
+        GetMoviesOptions moviesOptions = new GetMoviesOptions
+        {
+            Title = request.Title,
+            Year = request.Year,
+            SortBy = request.SortBy?.Trim('+', '-'),
+            SortOrder = request.SortBy is null ? SortOrder.Unsorted
+                : request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending
+        };
+
+        return moviesOptions;
+    }
+
+    public static GetMoviesOptions WithUserId(this GetMoviesOptions options, Guid? userId)
+    {
+        options.UserId = userId;
+        return options;
+    }
 }
