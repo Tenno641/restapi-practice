@@ -8,11 +8,13 @@ public class MovieService : IMovieService
 {
     private readonly IMovieRepository _movieRepository;
     private readonly IValidator<Movie> _validator;
+    private readonly IRatingRepository _ratingRepository;
 
-    public MovieService(IMovieRepository movieRepository, IValidator<Movie> validator)
+    public MovieService(IMovieRepository movieRepository, IValidator<Movie> validator, IRatingRepository ratingRepository)
     {
         _movieRepository = movieRepository;
         _validator = validator;
+        _ratingRepository = ratingRepository;
     }
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken)
@@ -22,7 +24,7 @@ public class MovieService : IMovieService
         return await _movieRepository.CreateAsync(movie, cancellationToken);
     }
 
-    public async Task<Movie?> UpdateAsync(Movie movie, CancellationToken cancellationToken)
+    public async Task<Movie?> UpdateAsync(Movie movie, Guid? userId, CancellationToken cancellationToken)
     {
         await _validator.ValidateAndThrowAsync(movie, cancellationToken);
 
@@ -33,6 +35,17 @@ public class MovieService : IMovieService
 
         await _movieRepository.UpdateAsync(movie, cancellationToken);
 
+        if (!userId.HasValue)
+        {
+            float? rating = await _ratingRepository.GetRatingAsync(movie.Id, cancellationToken);
+            movie.Rating = rating;
+            return movie;
+        }
+
+        (float? rating, int? userRating) ratings = await _ratingRepository.GetRatingAsync(movie.Id, userId.Value, cancellationToken);
+        movie.UserRating = ratings.userRating;
+        movie.Rating = ratings.rating;
+        
         return movie;
     }
 
@@ -41,18 +54,18 @@ public class MovieService : IMovieService
         return await _movieRepository.DeleteAsync(id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Movie>> AllAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<Movie>> AllAsync(CancellationToken cancellationToken, Guid? userId)
     {
-        return await _movieRepository.AllAsync(cancellationToken);
+        return await _movieRepository.AllAsync(cancellationToken, userId);
     }
 
-    public async Task<Movie?> GetAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Movie?> GetAsync(Guid id, CancellationToken cancellationToken, Guid? userId)
     {
-        return await _movieRepository.GetAsync(id, cancellationToken);
+        return await _movieRepository.GetAsync(id, cancellationToken, userId);
     }
 
-    public async Task<Movie?> GetAsync(string slug, CancellationToken cancellationToken)
+    public async Task<Movie?> GetAsync(string slug, CancellationToken cancellationToken, Guid? userId)
     {
-        return await _movieRepository.GetAsync(slug, cancellationToken);
+        return await _movieRepository.GetAsync(slug, cancellationToken, userId);
     }
 }
