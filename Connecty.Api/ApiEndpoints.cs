@@ -21,6 +21,6 @@ public static class ApiEndpoints
     public static class Ratings
     {
         private const string Base = $"{ApiBase}/ratings";
-        private const string UserRatings = $"{Base}/me";
+        public const string UserRatings = $"{Base}/me";
     }
 }

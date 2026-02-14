@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Connecty.Application.data;
+using Connecty.Application.Models;
 using Dapper;
 
 namespace Connecty.Application.Repositories;
@@ -13,6 +14,35 @@ public class RatingRepository : IRatingRepository
         _connectionFactory = connectionFactory;
     }
 
+    public async Task<IEnumerable<MovieRating>> GetUserRatings(Guid? userId, CancellationToken cancellationToken = default)
+    {
+        IDbConnection connection = await _connectionFactory.CreateConnectionAsync();
+
+        CommandDefinition command = new CommandDefinition($"""
+                                                           SELECT r.rating, r.movieId, m.slug
+                                                           FROM ratings r 
+                                                           INNER JOIN movies m ON r.movieId = m.id
+                                                           WHERE userid = @userId
+                                                           """, new { userId }, cancellationToken: cancellationToken);
+
+        IEnumerable<MovieRating> movieRatings = await connection.QueryAsync<MovieRating>(command);
+
+        return movieRatings;
+    }
+    
+    public async Task<bool> DeleteRatingAsync(Guid movieId, Guid? userId = default, CancellationToken cancellationToken = default)
+    {
+        IDbConnection connection = await _connectionFactory.CreateConnectionAsync();
+
+        CommandDefinition command = new CommandDefinition($"""
+                                                           DELETE FROM ratings
+                                                           WHERE movieid = @movieId and userid = @userId
+                                                           """, new { movieId, userId}, cancellationToken: cancellationToken);
+
+        int result = await connection.ExecuteAsync(command);
+
+        return result > 0;
+    }
     public async Task<bool> RateMovieAsync(Guid movieId, int rating, Guid? userId, CancellationToken cancellationToken = default)
     {
         IDbConnection connection = await _connectionFactory.CreateConnectionAsync();
