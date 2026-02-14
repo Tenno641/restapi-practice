@@ -2,6 +2,7 @@
 
 public interface IRatingRepository
 {
-    Task<float?> GetRatingAsync(Guid movieId, CancellationToken cancellationToken);
-    Task<(float? rating, int? userRating)> GetRatingAsync(Guid movieId, CancellationToken cancellationToken, Guid userId);
+    Task<bool> RateMovieAsync(Guid movieId, int rating, Guid? userId = default, CancellationToken cancellationToken = default);
+    Task<float?> GetRatingAsync(Guid movieId, CancellationToken cancellationToken = default);
+    Task<(float? rating, int? userRating)> GetRatingAsync(Guid movieId, Guid userId, CancellationToken cancellationToken = default);
 }

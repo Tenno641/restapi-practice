@@ -42,7 +42,7 @@ public class MovieService : IMovieService
             return movie;
         }
 
-        (float? rating, int? userRating) ratings = await _ratingRepository.GetRatingAsync(movie.Id, cancellationToken, userId.Value);
+        (float? rating, int? userRating) ratings = await _ratingRepository.GetRatingAsync(movie.Id, userId.Value, cancellationToken);
         movie.UserRating = ratings.userRating;
         movie.Rating = ratings.rating;
         
