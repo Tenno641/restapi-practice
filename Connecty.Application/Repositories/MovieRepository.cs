@@ -107,22 +107,24 @@ public class MovieRepository : IMovieRepository
         return result > 0;
     }
 
-    public async Task<IEnumerable<Movie>> AllAsync(CancellationToken cancellationToken, Guid? userId)
+    public async Task<IEnumerable<Movie>> AllAsync(GetMoviesOptions options, CancellationToken cancellationToken)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
         CommandDefinition command = new CommandDefinition($"""
                                                            select m.*, 
-                                                                  string_agg(distinct g.name, ',') as genres , 
-                                                                  round(avg(r.rating), 1) as rating, 
-                                                                  myr.rating as userrating
+                                                               string_agg(distinct g.name, ',') as genres , 
+                                                               round(avg(r.rating), 1) as rating, 
+                                                               myr.rating as userrating
                                                            from movies m 
-                                                           left join genres g on m.id = g.movieid
-                                                           left join ratings r on m.id = r.movieid
-                                                           left join ratings myr on m.id = myr.movieid
-                                                               and myr.userid = @userId
+                                                               left join genres g on m.id = g.movieid
+                                                               left join ratings r on m.id = r.movieid
+                                                               left join ratings myr on m.id = myr.movieid AND myr.userid = @userId
+                                                           WHERE
+                                                               (@title is null or title like ('%' || @title || '%')) AND
+                                                               (@year is null or yearofrelease = @year)
                                                            group by id, userrating;
-                                                           """, new { userId }, cancellationToken: cancellationToken);
+                                                           """, new { options.UserId, options.Title, options.Year }, cancellationToken: cancellationToken);
 
         var result = await connection.QueryAsync(command);
         
