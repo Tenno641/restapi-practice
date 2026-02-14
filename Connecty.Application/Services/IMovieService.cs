@@ -10,4 +10,5 @@ public interface IMovieService
     Task<IEnumerable<Movie>> AllAsync(GetMoviesOptions options, CancellationToken cancellationToken = default);
     Task<Movie?> GetAsync(Guid id, CancellationToken cancellationToken = default ,Guid? userId = default);
     Task<Movie?> GetAsync(string slug, CancellationToken cancellationToken = default, Guid? userId = default);
+    Task<int> GetTotalCountAsync(string? title, int? year, CancellationToken cancellationToken = default);
 }

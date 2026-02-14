@@ -47,7 +47,9 @@ public class MoviesController : Controller
         
         IEnumerable<Movie> movies = await _movieService.AllAsync(moviesOptions, cancellationToken);
 
-        MoviesResponse responses = movies.ToResponses();
+        int total = await _movieService.GetTotalCountAsync(options.Title, options.Year, cancellationToken);
+
+        MoviesResponse responses = movies.ToResponses(options.Page, options.PageSize, total);
 
         return Ok(responses);
     }

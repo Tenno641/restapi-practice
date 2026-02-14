@@ -121,6 +121,8 @@ public class MovieRepository : IMovieRepository
                               """;
         }
 
+        int? offset = (options.Page - 1) * options.PageSize ?? 0;
+
         CommandDefinition command = new CommandDefinition($"""
                                                            select m.*, 
                                                                string_agg(distinct g.name, ',') as genres , 
@@ -134,7 +136,8 @@ public class MovieRepository : IMovieRepository
                                                                (@title is null or title like ('%' || @title || '%')) AND
                                                                (@year is null or yearofrelease = @year)
                                                            group by id, userrating {sortingCommand}
-                                                           """, new { options.UserId, options.Title, options.Year }, cancellationToken: cancellationToken);
+                                                           LIMIT @pageSize OFFSET @offset;
+                                                           """, new { options.UserId, options.Title, options.Year, pageSize = options.PageSize, offset }, cancellationToken: cancellationToken);
 
         var result = await connection.QueryAsync(command);
         
@@ -217,5 +220,19 @@ public class MovieRepository : IMovieRepository
         bool result = connection.ExecuteScalar<bool>(command);
 
         return result;
+    }
+    public async Task<int> GetTotalCountAsync(string? title, int? year, CancellationToken cancellationToken)
+    {
+        IDbConnection connection = await _connectionFactory.CreateConnectionAsync();
+        
+        CommandDefinition command = new CommandDefinition($"""
+                                                           SELECT COUNT(id) FROM movies
+                                                           WHERE (@title is null OR title like ('%' || @title || '%')) AND
+                                                           (@year is null OR yearofrelease = @year);
+                                                           """, new { title, year}, cancellationToken: cancellationToken);
+
+        int total = await connection.QuerySingleAsync<int>(command);
+
+        return total;
     }
 }

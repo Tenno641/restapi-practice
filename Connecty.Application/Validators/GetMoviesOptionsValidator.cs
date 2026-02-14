@@ -15,5 +15,12 @@ public class GetMoviesOptionsValidator : AbstractValidator<GetMoviesOptions>
 
         RuleFor(options => options.Year)
             .LessThanOrEqualTo(DateTime.UtcNow.Year);
+
+        RuleFor(options => options.PageSize)
+            .InclusiveBetween(1, 15)
+            .WithMessage("PageSize must be between 1..15");
+
+        RuleFor(options => options.Page)
+            .GreaterThanOrEqualTo(1);
     }
 }
