@@ -35,11 +35,19 @@ public static class MovieMappings
         return response;
     }
 
-    public static MoviesResponse ToResponses(this IEnumerable<Movie> movies)
+    public static MoviesResponse ToResponses(this IEnumerable<Movie> movies, int? page, int? pageSize, int total)
     {
-        IEnumerable<MovieResponse> moviesResponse = movies.Select(ToResponse);
+        IEnumerable<MovieResponse> items = movies.Select(ToResponse);
 
-        return new MoviesResponse { Items = moviesResponse };
+        MoviesResponse moviesResponse = new MoviesResponse
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            Total = total
+        };
+
+        return moviesResponse;
     }
 
     public static Movie ToMovie(this UpdateMovie request, Guid id)
@@ -53,5 +61,27 @@ public static class MovieMappings
         };
 
         return movie;
+    }
+
+    public static GetMoviesOptions ToMoviesOptions(this GetMoviesOptionsRequest request)
+    {
+        GetMoviesOptions moviesOptions = new GetMoviesOptions
+        {
+            Title = request.Title,
+            Year = request.Year,
+            SortBy = request.SortBy?.Trim('+', '-'),
+            SortOrder = request.SortBy is null ? SortOrder.Unsorted
+                : request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending,
+            Page = request.Page,
+            PageSize = request.PageSize
+        };
+
+        return moviesOptions;
+    }
+
+    public static GetMoviesOptions WithUserId(this GetMoviesOptions options, Guid? userId)
+    {
+        options.UserId = userId;
+        return options;
     }
 }

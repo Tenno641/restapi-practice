@@ -1,6 +1,6 @@
 ﻿namespace Connecty.Contracts.Responses;
 
-public class MovieResponse
+public class MovieResponse : HalResponse
 {
     public required Guid Id { get; init; }
     public required string Title { get; init; }
