@@ -57,7 +57,7 @@ public class MoviesController : Controller
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get(string idOrSlug, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromServices] LinkGenerator linkGenerator, string idOrSlug, CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
         
@@ -69,6 +69,20 @@ public class MoviesController : Controller
             return NotFound();
 
         MovieResponse response = movie.ToResponse();
+        
+        response.Links.Add(new Link
+        {
+            Type = HttpMethods.Put,
+            href = linkGenerator.GetPathByAction(HttpContext, nameof(Create), values: new { id = movie.Id }),
+            Rel = "Self"
+        });
+        
+        response.Links.Add(new Link
+        {
+            Type = HttpMethods.Delete,
+            href = linkGenerator.GetPathByAction(HttpContext, nameof(Delete), values: new { id = movie.Id }),
+            Rel = "Self"
+        });
 
         return Ok(response);
     }
