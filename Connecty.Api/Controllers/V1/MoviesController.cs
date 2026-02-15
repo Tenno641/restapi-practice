@@ -23,7 +23,8 @@ public class MoviesController : Controller
 
     [Authorize(AuthConstants.TrustedMember)]
     [HttpPost(ApiEndpoints.Movies.Create)]
-    [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateMovie request, CancellationToken cancellationToken)
     {
         Movie movie = request.ToMovie();
@@ -56,7 +57,6 @@ public class MoviesController : Controller
         return Ok(responses);
     }
 
-    [ApiVersion(1.0)]
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -80,6 +80,7 @@ public class MoviesController : Controller
     [HttpPut(ApiEndpoints.Movies.Update)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMovie request, CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();

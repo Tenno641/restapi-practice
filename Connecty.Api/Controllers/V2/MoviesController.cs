@@ -19,7 +19,6 @@ public class MoviesController : Controller
         _movieService = movieService;
     }
 
-    [ApiVersion(2.0)]
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
