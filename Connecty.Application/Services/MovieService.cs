@@ -1,4 +1,5 @@
-﻿using Connecty.Application.Models;
+﻿using System.Text.Json;
+using Connecty.Application.Models;
 using Connecty.Application.Repositories;
 using FluentValidation;
 
@@ -7,26 +8,28 @@ namespace Connecty.Application.Services;
 public class MovieService : IMovieService
 {
     private readonly IMovieRepository _movieRepository;
-    private readonly IValidator<Movie> _validator;
+    private readonly IValidator<Movie> _movieValidator;
+    private readonly IValidator<GetMoviesOptions> _optionsValidator;
     private readonly IRatingRepository _ratingRepository;
 
-    public MovieService(IMovieRepository movieRepository, IValidator<Movie> validator, IRatingRepository ratingRepository)
+    public MovieService(IMovieRepository movieRepository, IValidator<Movie> movieValidator, IRatingRepository ratingRepository, IValidator<GetMoviesOptions> optionsValidator)
     {
         _movieRepository = movieRepository;
-        _validator = validator;
+        _movieValidator = movieValidator;
         _ratingRepository = ratingRepository;
+        _optionsValidator = optionsValidator;
     }
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken)
     {
-        await _validator.ValidateAndThrowAsync(movie, cancellationToken);
+        await _movieValidator.ValidateAndThrowAsync(movie, cancellationToken);
 
         return await _movieRepository.CreateAsync(movie, cancellationToken);
     }
 
     public async Task<Movie?> UpdateAsync(Movie movie, Guid? userId, CancellationToken cancellationToken)
     {
-        await _validator.ValidateAndThrowAsync(movie, cancellationToken);
+        await _movieValidator.ValidateAndThrowAsync(movie, cancellationToken);
 
         bool exists = await _movieRepository.ExistsAsync(movie.Id, cancellationToken);
 
@@ -54,9 +57,11 @@ public class MovieService : IMovieService
         return await _movieRepository.DeleteAsync(id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Movie>> AllAsync(CancellationToken cancellationToken, Guid? userId)
+    public async Task<IEnumerable<Movie>> AllAsync(GetMoviesOptions options, CancellationToken cancellationToken)
     {
-        return await _movieRepository.AllAsync(cancellationToken, userId);
+        await _optionsValidator.ValidateAndThrowAsync(options, cancellationToken);
+        
+        return await _movieRepository.AllAsync(options, cancellationToken);
     }
 
     public async Task<Movie?> GetAsync(Guid id, CancellationToken cancellationToken, Guid? userId)
@@ -67,5 +72,9 @@ public class MovieService : IMovieService
     public async Task<Movie?> GetAsync(string slug, CancellationToken cancellationToken, Guid? userId)
     {
         return await _movieRepository.GetAsync(slug, cancellationToken, userId);
+    }
+    public async Task<int> GetTotalCountAsync(string? title, int? year, CancellationToken cancellationToken)
+    {
+        return await _movieRepository.GetTotalCountAsync(title, year, cancellationToken);
     }
 }

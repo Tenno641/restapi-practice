@@ -1,15 +1,17 @@
-﻿using Connecty.Api.Mappings;
+﻿using Asp.Versioning;
+using Connecty.Api.Auth;
+using Connecty.Api.Mappings;
 using Connecty.Application.Models;
 using Connecty.Application.Services;
 using Connecty.Contracts.Requests;
 using Connecty.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Connecty.Api.Auth;
 
-namespace Connecty.Api.Controllers;
+namespace Connecty.Api.Controllers.V1;
 
 [ApiController]
+[ApiVersion(1.0)]
 public class MoviesController : Controller
 {
     private readonly IMovieService _movieService;
@@ -21,7 +23,8 @@ public class MoviesController : Controller
 
     [Authorize(AuthConstants.TrustedMember)]
     [HttpPost(ApiEndpoints.Movies.Create)]
-    [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateMovie request, CancellationToken cancellationToken)
     {
         Movie movie = request.ToMovie();
@@ -38,13 +41,18 @@ public class MoviesController : Controller
 
     [HttpGet(ApiEndpoints.Movies.GetAll)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll([FromQuery] GetMoviesOptionsRequest options, CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
-        
-        IEnumerable<Movie> movies = await _movieService.AllAsync(cancellationToken, userId);
 
-        MoviesResponse responses = movies.ToResponses();
+        GetMoviesOptions moviesOptions = options.ToMoviesOptions()
+            .WithUserId(userId);
+        
+        IEnumerable<Movie> movies = await _movieService.AllAsync(moviesOptions, cancellationToken);
+
+        int total = await _movieService.GetTotalCountAsync(options.Title, options.Year, cancellationToken);
+
+        MoviesResponse responses = movies.ToResponses(options.Page, options.PageSize, total);
 
         return Ok(responses);
     }
@@ -72,6 +80,7 @@ public class MoviesController : Controller
     [HttpPut(ApiEndpoints.Movies.Update)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMovie request, CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();

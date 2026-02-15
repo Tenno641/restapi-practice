@@ -107,22 +107,37 @@ public class MovieRepository : IMovieRepository
         return result > 0;
     }
 
-    public async Task<IEnumerable<Movie>> AllAsync(CancellationToken cancellationToken, Guid? userId)
+    public async Task<IEnumerable<Movie>> AllAsync(GetMoviesOptions options, CancellationToken cancellationToken)
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
+        string sortingCommand = string.Empty;
+
+        if (options.SortBy is not null)
+        {
+            sortingCommand = $"""
+                              , m.{options.SortBy}
+                              ORDER BY m.{options.SortBy} {(options.SortOrder == SortOrder.Ascending ? "asc" : "desc")}
+                              """;
+        }
+
+        int? offset = (options.Page - 1) * options.PageSize ?? 0;
+
         CommandDefinition command = new CommandDefinition($"""
                                                            select m.*, 
-                                                                  string_agg(distinct g.name, ',') as genres , 
-                                                                  round(avg(r.rating), 1) as rating, 
-                                                                  myr.rating as userrating
+                                                               string_agg(distinct g.name, ',') as genres , 
+                                                               round(avg(r.rating), 1) as rating, 
+                                                               myr.rating as userrating
                                                            from movies m 
-                                                           left join genres g on m.id = g.movieid
-                                                           left join ratings r on m.id = r.movieid
-                                                           left join ratings myr on m.id = myr.movieid
-                                                               and myr.userid = @userId
-                                                           group by id, userrating;
-                                                           """, new { userId }, cancellationToken: cancellationToken);
+                                                               left join genres g on m.id = g.movieid
+                                                               left join ratings r on m.id = r.movieid
+                                                               left join ratings myr on m.id = myr.movieid AND myr.userid = @userId
+                                                           WHERE
+                                                               (@title is null or title like ('%' || @title || '%')) AND
+                                                               (@year is null or yearofrelease = @year)
+                                                           group by id, userrating {sortingCommand}
+                                                           LIMIT @pageSize OFFSET @offset;
+                                                           """, new { options.UserId, options.Title, options.Year, pageSize = options.PageSize, offset }, cancellationToken: cancellationToken);
 
         var result = await connection.QueryAsync(command);
         
@@ -145,7 +160,7 @@ public class MovieRepository : IMovieRepository
                                                            SELECT m.*, round(avg(r.rating), 1) as rating, myr.rating as userRating 
                                                            FROM "movies" m
                                                            LEFT JOIN ratings r ON m.id = r.movieId
-                                                           LEFT JOIN ratings myr ON myr.userid = @userId
+                                                           LEFT JOIN ratings myr ON myr.userid = @userId AND m.id = myr.movieid
                                                            WHERE id = @id
                                                            GROUP BY id, userRating;
                                                            """, new { id, userId }, cancellationToken: cancellationToken);
@@ -173,7 +188,7 @@ public class MovieRepository : IMovieRepository
         CommandDefinition moviesRetrieveCommand = new CommandDefinition($"""
                                                            SELECT m.*, round(avg(r.rating), 1) as rating, myr.rating as userRating FROM "movies" m  
                                                            LEFT JOIN ratings r ON m.id = r.movieid
-                                                           LEFT JOIN ratings myr ON myr.userid = @userId
+                                                           LEFT JOIN ratings myr ON myr.userid = @userId AND myr.movieid = m.id
                                                            WHERE slug = @slug
                                                            GROUP BY id, userRating;
                                                            """, new { slug, userId }, cancellationToken: cancellationToken);
@@ -205,5 +220,19 @@ public class MovieRepository : IMovieRepository
         bool result = connection.ExecuteScalar<bool>(command);
 
         return result;
+    }
+    public async Task<int> GetTotalCountAsync(string? title, int? year, CancellationToken cancellationToken)
+    {
+        IDbConnection connection = await _connectionFactory.CreateConnectionAsync();
+        
+        CommandDefinition command = new CommandDefinition($"""
+                                                           SELECT COUNT(id) FROM movies
+                                                           WHERE (@title is null OR title like ('%' || @title || '%')) AND
+                                                           (@year is null OR yearofrelease = @year);
+                                                           """, new { title, year}, cancellationToken: cancellationToken);
+
+        int total = await connection.QuerySingleAsync<int>(command);
+
+        return total;
     }
 }
