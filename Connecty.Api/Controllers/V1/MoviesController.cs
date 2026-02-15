@@ -60,7 +60,7 @@ public class MoviesController : Controller
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get([FromServices] LinkGenerator linkGenerator, string idOrSlug, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(string idOrSlug, CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
         

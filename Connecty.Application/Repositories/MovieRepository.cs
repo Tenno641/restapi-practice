@@ -160,7 +160,7 @@ public class MovieRepository : IMovieRepository
                                                            SELECT m.*, round(avg(r.rating), 1) as rating, myr.rating as userRating 
                                                            FROM "movies" m
                                                            LEFT JOIN ratings r ON m.id = r.movieId
-                                                           LEFT JOIN ratings myr ON myr.userid = @userId
+                                                           LEFT JOIN ratings myr ON myr.userid = @userId AND m.id = myr.movieid
                                                            WHERE id = @id
                                                            GROUP BY id, userRating;
                                                            """, new { id, userId }, cancellationToken: cancellationToken);
@@ -188,7 +188,7 @@ public class MovieRepository : IMovieRepository
         CommandDefinition moviesRetrieveCommand = new CommandDefinition($"""
                                                            SELECT m.*, round(avg(r.rating), 1) as rating, myr.rating as userRating FROM "movies" m  
                                                            LEFT JOIN ratings r ON m.id = r.movieid
-                                                           LEFT JOIN ratings myr ON myr.userid = @userId
+                                                           LEFT JOIN ratings myr ON myr.userid = @userId AND myr.movieid = m.id
                                                            WHERE slug = @slug
                                                            GROUP BY id, userRating;
                                                            """, new { slug, userId }, cancellationToken: cancellationToken);
