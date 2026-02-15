@@ -2,6 +2,6 @@
 
 public class PaginationOptions
 {
-    public required int? Page { get; set; } = 1;
-    public required int? PageSize { get; set; } = 25;
+    public required int? Page { get; set; }
+    public required int? PageSize { get; set; }
 }

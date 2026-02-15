@@ -44,8 +44,7 @@ public static class MovieMappings
             Items = items,
             Page = page,
             PageSize = pageSize,
-            Total = total,
-            Readable = total > page * pageSize
+            Total = total
         };
 
         return moviesResponse;
