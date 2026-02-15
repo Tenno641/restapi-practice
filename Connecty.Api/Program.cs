@@ -1,5 +1,6 @@
 using System.Data;
 using System.Text;
+using Asp.Versioning;
 using Connecty.Api.Middlewares;
 using Connecty.Application;
 using Connecty.Application.data;
@@ -44,6 +45,14 @@ builder.Services.AddAuthorizationBuilder()
           return context.User.HasClaim(claim => claim is { Type: AuthConstants.AdminPolicy, Value: "true" }) ||
                  context.User.HasClaim(claim => claim is { Type: AuthConstants.TrustedMember, Value: "true" }); 
       }));
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+}).AddApiExplorer();
 
 var app = builder.Build();
 

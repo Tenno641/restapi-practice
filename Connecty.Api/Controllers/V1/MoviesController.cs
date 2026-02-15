@@ -1,15 +1,17 @@
-﻿using Connecty.Api.Mappings;
+﻿using Asp.Versioning;
+using Connecty.Api.Auth;
+using Connecty.Api.Mappings;
 using Connecty.Application.Models;
 using Connecty.Application.Services;
 using Connecty.Contracts.Requests;
 using Connecty.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Connecty.Api.Auth;
 
-namespace Connecty.Api.Controllers;
+namespace Connecty.Api.Controllers.V1;
 
 [ApiController]
+[ApiVersion(1.0)]
 public class MoviesController : Controller
 {
     private readonly IMovieService _movieService;
@@ -54,6 +56,7 @@ public class MoviesController : Controller
         return Ok(responses);
     }
 
+    [ApiVersion(1.0)]
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -69,20 +72,6 @@ public class MoviesController : Controller
             return NotFound();
 
         MovieResponse response = movie.ToResponse();
-        
-        response.Links.Add(new Link
-        {
-            Type = HttpMethods.Put,
-            href = linkGenerator.GetPathByAction(HttpContext, nameof(Create), values: new { id = movie.Id }),
-            Rel = "Self"
-        });
-        
-        response.Links.Add(new Link
-        {
-            Type = HttpMethods.Delete,
-            href = linkGenerator.GetPathByAction(HttpContext, nameof(Delete), values: new { id = movie.Id }),
-            Rel = "Self"
-        });
 
         return Ok(response);
     }

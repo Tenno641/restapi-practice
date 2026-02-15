@@ -1,16 +1,17 @@
-﻿using Connecty.Api.Auth;
+﻿using Asp.Versioning;
+using Connecty.Api.Auth;
+using Connecty.Api.Mappings;
 using Connecty.Application.Models;
 using Connecty.Application.Services;
 using Connecty.Contracts.Requests;
 using Connecty.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Connecty.Api.Mappings;
 
-
-namespace Connecty.Api.Controllers;
+namespace Connecty.Api.Controllers.V1;
 
 [ApiController]
+[ApiVersion(1.0)]
 public class RatingsController : Controller
 {
     private readonly IRatingsService _ratingsService;
