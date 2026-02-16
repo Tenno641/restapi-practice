@@ -7,6 +7,7 @@ using Connecty.Application.data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Connecty.Api.Auth;
+using Connecty.Api.Health;
 using Connecty.Api.Scalar;
 using Scalar.AspNetCore;
 
@@ -72,7 +73,12 @@ builder.Services.AddOpenApi("v2", options =>
     options.AddDocumentTransformer<AuthenticationOpenApiTransformer>();
 });
 
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthcheck>(DatabaseHealthcheck.Service);
+
 var app = builder.Build();
+
+app.MapHealthChecks("_health");
 
 app.MapOpenApi();
 app.MapScalarApiReference(options =>
