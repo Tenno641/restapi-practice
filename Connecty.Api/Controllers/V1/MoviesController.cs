@@ -7,6 +7,7 @@ using Connecty.Contracts.Requests;
 using Connecty.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace Connecty.Api.Controllers.V1;
 
@@ -15,10 +16,12 @@ namespace Connecty.Api.Controllers.V1;
 public class MoviesController : Controller
 {
     private readonly IMovieService _movieService;
+    private readonly IOutputCacheStore _outputCacheStore;
 
-    public MoviesController(IMovieService movieService)
+    public MoviesController(IMovieService movieService, IOutputCacheStore outputCacheStore)
     {
         _movieService = movieService;
+        _outputCacheStore = outputCacheStore;
     }
 
     [Authorize(AuthConstants.TrustedMember)]
@@ -36,10 +39,12 @@ public class MoviesController : Controller
 
         MovieResponse response = movie.ToResponse();
 
+        await _outputCacheStore.EvictByTagAsync("movies", cancellationToken);
         return CreatedAtAction(nameof(Get), new { idOrSlug = response.Id }, response);
     }
 
     [HttpGet(ApiEndpoints.Movies.GetAll)]
+    [OutputCache(PolicyName = "movies")]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetMoviesOptionsRequest options, CancellationToken cancellationToken)
     {
@@ -94,6 +99,7 @@ public class MoviesController : Controller
 
         MovieResponse response = movie.ToResponse();
 
+        await _outputCacheStore.EvictByTagAsync("movies", cancellationToken);
         return Ok(response);
     }
 
@@ -108,6 +114,7 @@ public class MoviesController : Controller
         if (!isDeleted)
             return NotFound();
 
+        await _outputCacheStore.EvictByTagAsync("movies", cancellationToken);
         return Ok();
     }
 }
