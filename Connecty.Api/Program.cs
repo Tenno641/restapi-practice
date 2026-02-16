@@ -43,10 +43,10 @@ builder.Services.AddAuthorizationBuilder()
         policyBuilder.RequireClaim(AuthConstants.AdminPolicy, "true");
     
     }).AddPolicy(AuthConstants.TrustedMember, policyBuilder => policyBuilder.RequireAssertion(context =>
-      {
+    {
           return context.User.HasClaim(claim => claim is { Type: AuthConstants.AdminPolicy, Value: "true" }) ||
                  context.User.HasClaim(claim => claim is { Type: AuthConstants.TrustedMember, Value: "true" }); 
-      }));
+    }));
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -71,6 +71,8 @@ builder.Services.AddOpenApi("v2", options =>
     options.AddOperationTransformer<MediaTypeVersionTransformer>();
     options.AddDocumentTransformer<AuthenticationOpenApiTransformer>();
 });
+
+// builder.Services.AddResponseCaching();
 
 builder.Services.AddOutputCache(options =>
 {
@@ -97,6 +99,7 @@ app.UseMiddleware<ValidationMappingMiddleware>();
 
 app.UseCors();
 app.UseOutputCache();
+// app.UseResponseCaching();
 
 app.UseAuthentication();
 app.UseAuthorization();
