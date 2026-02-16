@@ -9,6 +9,7 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseResponseCaching();
 app.MapControllers();
 
 app.Run();

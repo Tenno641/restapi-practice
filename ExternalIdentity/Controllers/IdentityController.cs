@@ -13,6 +13,7 @@ public class IdentityController : Controller
         _tokenService = tokenService;
     }
 
+    [ResponseCache(NoStore= true)]
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public IActionResult Create([FromBody] CreateTokenRequest tokenRequest)

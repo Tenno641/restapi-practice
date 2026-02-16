@@ -19,6 +19,7 @@ public class MoviesController : Controller
         _movieService = movieService;
     }
 
+    [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60, VaryByHeader = "Accept,Accept-Encoding,User-Agent")]
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
