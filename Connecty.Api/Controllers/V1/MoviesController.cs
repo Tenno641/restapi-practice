@@ -39,6 +39,7 @@ public class MoviesController : Controller
         return CreatedAtAction(nameof(Get), new { idOrSlug = response.Id }, response);
     }
 
+    [ResponseCache(Duration = 60, VaryByHeader = "Accept,User-Agent,Accept-Encoding", Location = ResponseCacheLocation.Any, VaryByQueryKeys = ["title", "year", "sortBy", "page", "pageSize"])]
     [HttpGet(ApiEndpoints.Movies.GetAll)]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] GetMoviesOptionsRequest options, CancellationToken cancellationToken)
@@ -57,6 +58,7 @@ public class MoviesController : Controller
         return Ok(responses);
     }
 
+    [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60, VaryByHeader = "Accept,Accept-Encoding,User-Agent")]
     [HttpGet(ApiEndpoints.Movies.Get)]
     [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
