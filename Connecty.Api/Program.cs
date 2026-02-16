@@ -72,6 +72,18 @@ builder.Services.AddOpenApi("v2", options =>
     options.AddDocumentTransformer<AuthenticationOpenApiTransformer>();
 });
 
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("movies", policyBuilder =>
+    {
+        policyBuilder
+            .Expire(TimeSpan.FromMinutes(1))
+            .SetVaryByHeader(["Accept", "Accept-Encoding", "User-Agent"])
+            .SetVaryByQuery(["title", "year", "sortBy", "page", "pageSize"])
+            .Tag("movies");
+    });
+});
+
 var app = builder.Build();
 
 app.MapOpenApi();
@@ -82,6 +94,9 @@ app.MapScalarApiReference(options =>
 });
 
 app.UseMiddleware<ValidationMappingMiddleware>();
+
+app.UseCors();
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
