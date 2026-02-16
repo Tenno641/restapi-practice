@@ -72,6 +72,8 @@ builder.Services.AddOpenApi("v2", options =>
     options.AddDocumentTransformer<AuthenticationOpenApiTransformer>();
 });
 
+// builder.Services.AddResponseCaching();
+
 builder.Services.AddOutputCache(options =>
 {
     options.AddPolicy("movies", policyBuilder =>
